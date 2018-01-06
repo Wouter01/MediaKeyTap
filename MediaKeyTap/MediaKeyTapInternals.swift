@@ -26,6 +26,8 @@ extension EventTapError: CustomStringConvertible {
 }
 
 protocol MediaKeyTapInternalsDelegate {
+	var keysToWatch: [MediaKey] { get set }
+	var observeBuiltIn: Bool { get set }
     func updateInterceptMediaKeys(_ intercept: Bool)
     func handle(keyEvent: KeyEvent)
     func isInterceptingMediaKeys() -> Bool
@@ -93,8 +95,17 @@ class MediaKeyTapInternals {
         if let nsEvent = NSEvent(cgEvent: event) {
             guard type.rawValue == UInt32(NX_SYSDEFINED)
                 && nsEvent.isMediaKeyEvent
+				&& delegate?.keysToWatch.contains(MediaKeyTap.keycodeToMediaKey(nsEvent.keyEvent.keycode) ?? .volumeUp) ?? false
                 && delegate?.isInterceptingMediaKeys() ?? false
             else { return event }
+
+			if delegate?.observeBuiltIn ?? true == false {
+				if let id = NSScreen.main?.deviceDescription[NSDeviceDescriptionKey.init("NSScreenNumber")] as? CGDirectDisplayID {
+					if CGDisplayIsBuiltin(id) != 0 {
+						return event
+					}
+				}
+			}
 
             DispatchQueue.main.async {
                 self.delegate?.handle(keyEvent: nsEvent.keyEvent)
