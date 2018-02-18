@@ -38,7 +38,7 @@ public struct KeyEvent {
 }
 
 public protocol MediaKeyTapDelegate {
-    func handle(mediaKey: MediaKey, event: KeyEvent)
+    func handle(mediaKey: MediaKey, event: KeyEvent?)
 }
 
 public class MediaKeyTap {
@@ -101,6 +101,15 @@ public class MediaKeyTap {
         } catch {}
     }
 
+	/// Stop the key tap
+	open func stop() {
+		mediaApplicationWatcher.delegate = nil
+		mediaApplicationWatcher.stop()
+
+		internals.delegate = nil
+		internals.stopWatchingMediaKeys()
+	}
+
     public static func keycodeToMediaKey(_ keycode: Keycode) -> MediaKey? {
         switch keycode {
         case NX_KEYTYPE_PLAY: return .playPause
@@ -113,6 +122,11 @@ public class MediaKeyTap {
 		case NX_KEYTYPE_SOUND_UP: return .volumeUp
 		case NX_KEYTYPE_SOUND_DOWN: return .volumeDown
 		case NX_KEYTYPE_MUTE: return .mute
+		case 122 : return .brightnessDown
+		case 120 : return .brightnessUp
+		case 109 : return .mute
+		case 103 : return .volumeDown
+		case 111 : return .volumeUp
         default: return nil
         }
     }

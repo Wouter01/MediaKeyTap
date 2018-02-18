@@ -92,6 +92,22 @@ class MediaKeyTapInternals {
     }
 
     private func handle(event: CGEvent, ofType type: CGEventType) -> CGEvent? {
+		if (type == .keyDown) {
+			let keycode: Int64 = event.getIntegerValueField(.keyboardEventKeycode)
+			// F1
+			if (keycode == 103 || keycode == 109 || keycode == 111 || keycode == 120 || keycode == 122) &&
+				delegate?.keysToWatch.contains(MediaKeyTap.keycodeToMediaKey(Int32(keycode)) ?? .volumeUp) ?? false {
+
+				DispatchQueue.main.async {
+					self.delegate?.handle(keyEvent: KeyEvent(keycode: Int32(keycode), keyFlags: 0, keyPressed: true, keyRepeat: false))
+				}
+
+				return nil
+			}
+
+			return event
+		}
+
         if let nsEvent = NSEvent(cgEvent: event) {
             guard type.rawValue == UInt32(NX_SYSDEFINED)
                 && nsEvent.isMediaKeyEvent
@@ -151,7 +167,7 @@ class MediaKeyTapInternals {
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
             options: .defaultTap,
-            eventsOfInterest: CGEventMask(1 << NX_SYSDEFINED),
+            eventsOfInterest: CGEventMask(1 << NX_KEYDOWN) | CGEventMask(1 << NX_SYSDEFINED),
             callback: cCallback,
             userInfo: refcon)
     }
