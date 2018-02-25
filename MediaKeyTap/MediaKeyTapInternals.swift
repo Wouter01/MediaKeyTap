@@ -29,7 +29,7 @@ protocol MediaKeyTapInternalsDelegate {
 	var keysToWatch: [MediaKey] { get set }
 	var observeBuiltIn: Bool { get set }
     func updateInterceptMediaKeys(_ intercept: Bool)
-    func handle(keyEvent: KeyEvent)
+	func handle(keyEvent: KeyEvent, isFunctionKey: Bool)
     func isInterceptingMediaKeys() -> Bool
 }
 
@@ -92,26 +92,34 @@ class MediaKeyTapInternals {
     }
 
     private func handle(event: CGEvent, ofType type: CGEventType) -> CGEvent? {
-		if (type == .keyDown) {
+		if type == .keyDown {
 			let keycode: Int64 = event.getIntegerValueField(.keyboardEventKeycode)
-			// F1
-			if (keycode == 103 || keycode == 109 || keycode == 111 || keycode == 120 || keycode == 122) &&
-				delegate?.keysToWatch.contains(MediaKeyTap.keycodeToMediaKey(Int32(keycode)) ?? .volumeUp) ?? false {
+			guard let mediaKey = MediaKeyTap.functionKeyCodeToMediaKey(Int32(keycode)) else { return event }
+			if delegate?.keysToWatch.contains(mediaKey) ?? false {
+
+				if delegate?.observeBuiltIn ?? true == false {
+					if let id = NSScreen.main?.deviceDescription[NSDeviceDescriptionKey.init("NSScreenNumber")] as? CGDirectDisplayID {
+						if CGDisplayIsBuiltin(id) != 0 {
+							return event
+						}
+					}
+				}
 
 				DispatchQueue.main.async {
-					self.delegate?.handle(keyEvent: KeyEvent(keycode: Int32(keycode), keyFlags: 0, keyPressed: true, keyRepeat: false))
+					self.delegate?.handle(keyEvent: KeyEvent(keycode: Int32(keycode), keyFlags: 0, keyPressed: true, keyRepeat: false), isFunctionKey: true)
 				}
 
 				return nil
+			} else {
+				return event
 			}
-
-			return event
 		}
 
         if let nsEvent = NSEvent(cgEvent: event) {
+			guard let mediaKey = MediaKeyTap.keycodeToMediaKey(nsEvent.keyEvent.keycode) else { return event }
             guard type.rawValue == UInt32(NX_SYSDEFINED)
                 && nsEvent.isMediaKeyEvent
-				&& delegate?.keysToWatch.contains(MediaKeyTap.keycodeToMediaKey(nsEvent.keyEvent.keycode) ?? .volumeUp) ?? false
+				&& delegate?.keysToWatch.contains(mediaKey) ?? false
                 && delegate?.isInterceptingMediaKeys() ?? false
             else { return event }
 
@@ -124,7 +132,7 @@ class MediaKeyTapInternals {
 			}
 
             DispatchQueue.main.async {
-                self.delegate?.handle(keyEvent: nsEvent.keyEvent)
+                self.delegate?.handle(keyEvent: nsEvent.keyEvent, isFunctionKey: false)
             }
 
             return nil

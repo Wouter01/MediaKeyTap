@@ -119,17 +119,23 @@ public class MediaKeyTap {
         case NX_KEYTYPE_FAST: return .fastForward
 		case NX_KEYTYPE_BRIGHTNESS_UP: return .brightnessUp
 		case NX_KEYTYPE_BRIGHTNESS_DOWN: return .brightnessDown
-		case NX_KEYTYPE_SOUND_UP: return .volumeUp
-		case NX_KEYTYPE_SOUND_DOWN: return .volumeDown
-		case NX_KEYTYPE_MUTE: return .mute
-		case 122 : return .brightnessDown
-		case 120 : return .brightnessUp
-		case 109 : return .mute
-		case 103 : return .volumeDown
-		case 111 : return .volumeUp
+		case NX_KEYTYPE_SOUND_UP : return .volumeUp
+		case NX_KEYTYPE_SOUND_DOWN : return .volumeDown
+		case NX_KEYTYPE_MUTE : return .mute
         default: return nil
         }
     }
+
+	public static func functionKeyCodeToMediaKey(_ keycode: Keycode) -> MediaKey? {
+		switch keycode {
+		case 113, 120, 144: return .brightnessUp
+		case 107, 122, 145: return .brightnessDown
+		case 111 : return .volumeUp
+		case 103 : return .volumeDown
+		case 109 : return .mute
+		default: return nil
+		}
+	}
 
     private func shouldNotifyDelegate(ofEvent event: KeyEvent) -> Bool {
         switch keyPressMode {
@@ -168,8 +174,8 @@ extension MediaKeyTap: MediaKeyTapInternalsDelegate {
         interceptMediaKeys = intercept
     }
 
-    func handle(keyEvent: KeyEvent) {
-        if let key = MediaKeyTap.keycodeToMediaKey(keyEvent.keycode) {
+    func handle(keyEvent: KeyEvent, isFunctionKey: Bool) {
+		if let key = isFunctionKey ? MediaKeyTap.functionKeyCodeToMediaKey(keyEvent.keycode) : MediaKeyTap.keycodeToMediaKey(keyEvent.keycode) {
 			if shouldNotifyDelegate(ofEvent: keyEvent) {
 				delegate.handle(mediaKey: key, event: keyEvent)
 			}
