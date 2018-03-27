@@ -70,7 +70,7 @@ public class MediaKeyTap {
 
     // MARK: - Setup
 
-	public init(delegate: MediaKeyTapDelegate, on mode: KeyPressMode = .keyDown, forKeys keys: [MediaKey], observeBuiltIn: Bool = true) {
+	public init(delegate: MediaKeyTapDelegate, on mode: KeyPressMode = .keyDown, for keys: [MediaKey] = [], observeBuiltIn: Bool = true) {
         self.delegate = delegate
         self.interceptMediaKeys = false
         self.mediaApplicationWatcher = MediaApplicationWatcher()
