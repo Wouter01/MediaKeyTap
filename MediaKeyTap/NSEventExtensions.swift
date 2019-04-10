@@ -14,12 +14,12 @@ extension NSEvent {
     }
 
     var keycode: Keycode {
-        return Keycode((data1 & 0xffff0000) >> 16)
+        return Keycode((data1 & 0xFFFF_0000) >> 16)
     }
 
     var keyEvent: KeyEvent {
-        let keyFlags = KeyFlags(data1 & 0x0000ffff)
-        let keyPressed = ((keyFlags & 0xff00) >> 8) == 0xa
+        let keyFlags = KeyFlags(data1 & 0x0000_FFFF)
+        let keyPressed = ((keyFlags & 0xFF00) >> 8) == 0xA
         let keyRepeat = (keyFlags & 0x1) == 0x1
 
         return KeyEvent(keycode: keycode, keyFlags: keyFlags, keyPressed: keyPressed, keyRepeat: keyRepeat)

@@ -14,11 +14,11 @@ public enum MediaKey {
     case next
     case rewind
     case fastForward
-	case brightnessUp
-	case brightnessDown
-	case volumeUp
-	case volumeDown
-	case mute
+    case brightnessUp
+    case brightnessDown
+    case volumeUp
+    case volumeDown
+    case mute
 }
 
 public enum KeyPressMode {
@@ -33,7 +33,7 @@ public typealias KeyFlags = Int32
 public struct KeyEvent {
     public let keycode: Keycode
     public let keyFlags: KeyFlags
-    public let keyPressed: Bool     // Will be true after a keyDown and false after a keyUp
+    public let keyPressed: Bool // Will be true after a keyDown and false after a keyUp
     public let keyRepeat: Bool
 }
 
@@ -46,40 +46,40 @@ public class MediaKeyTap {
     let mediaApplicationWatcher: MediaApplicationWatcher
     let internals: MediaKeyTapInternals
     let keyPressMode: KeyPressMode
-	var observeBuiltIn: Bool = true
-	var keysToWatch: [MediaKey] = [
-		.playPause,
-		.previous,
-		.next,
-		.rewind,
-		.fastForward,
-		.brightnessUp,
-		.brightnessDown,
-		.volumeUp,
-		.volumeDown,
-		.mute
-	]
+    var observeBuiltIn: Bool = true
+    var keysToWatch: [MediaKey] = [
+        .playPause,
+        .previous,
+        .next,
+        .rewind,
+        .fastForward,
+        .brightnessUp,
+        .brightnessDown,
+        .volumeUp,
+        .volumeDown,
+        .mute,
+    ]
 
-	var interceptMediaKeys: Bool {
+    var interceptMediaKeys: Bool {
         didSet {
             if interceptMediaKeys != oldValue {
-                self.internals.enableTap(interceptMediaKeys)
+                internals.enableTap(interceptMediaKeys)
             }
         }
     }
 
     // MARK: - Setup
 
-	public init(delegate: MediaKeyTapDelegate, on mode: KeyPressMode = .keyDown, for keys: [MediaKey] = [], observeBuiltIn: Bool = true) {
+    public init(delegate: MediaKeyTapDelegate, on mode: KeyPressMode = .keyDown, for keys: [MediaKey] = [], observeBuiltIn: Bool = true) {
         self.delegate = delegate
-        self.interceptMediaKeys = false
-        self.mediaApplicationWatcher = MediaApplicationWatcher()
-        self.internals = MediaKeyTapInternals()
-        self.keyPressMode = mode
-		self.observeBuiltIn = observeBuiltIn
-		if keys.count > 0 {
-			self.keysToWatch = keys
-		}
+        interceptMediaKeys = false
+        mediaApplicationWatcher = MediaApplicationWatcher()
+        internals = MediaKeyTapInternals()
+        keyPressMode = mode
+        self.observeBuiltIn = observeBuiltIn
+        if keys.count > 0 {
+            keysToWatch = keys
+        }
     }
 
     /// Activate the currently running application
@@ -101,14 +101,14 @@ public class MediaKeyTap {
         } catch {}
     }
 
-	/// Stop the key tap
-	open func stop() {
-		mediaApplicationWatcher.delegate = nil
-		mediaApplicationWatcher.stop()
+    /// Stop the key tap
+    open func stop() {
+        mediaApplicationWatcher.delegate = nil
+        mediaApplicationWatcher.stop()
 
-		internals.delegate = nil
-		internals.stopWatchingMediaKeys()
-	}
+        internals.delegate = nil
+        internals.stopWatchingMediaKeys()
+    }
 
     public static func keycodeToMediaKey(_ keycode: Keycode) -> MediaKey? {
         switch keycode {
@@ -117,22 +117,22 @@ public class MediaKeyTap {
         case NX_KEYTYPE_NEXT: return .next
         case NX_KEYTYPE_REWIND: return .rewind
         case NX_KEYTYPE_FAST: return .fastForward
-		case NX_KEYTYPE_BRIGHTNESS_UP: return .brightnessUp
-		case NX_KEYTYPE_BRIGHTNESS_DOWN: return .brightnessDown
-		case NX_KEYTYPE_SOUND_UP : return .volumeUp
-		case NX_KEYTYPE_SOUND_DOWN : return .volumeDown
-		case NX_KEYTYPE_MUTE : return .mute
+        case NX_KEYTYPE_BRIGHTNESS_UP: return .brightnessUp
+        case NX_KEYTYPE_BRIGHTNESS_DOWN: return .brightnessDown
+        case NX_KEYTYPE_SOUND_UP: return .volumeUp
+        case NX_KEYTYPE_SOUND_DOWN: return .volumeDown
+        case NX_KEYTYPE_MUTE: return .mute
         default: return nil
         }
     }
 
-	public static func functionKeyCodeToMediaKey(_ keycode: Keycode) -> MediaKey? {
-		switch keycode {
-		case 113, 144: return .brightnessUp
-		case 107, 145: return .brightnessDown
-		default: return nil
-		}
-	}
+    public static func functionKeyCodeToMediaKey(_ keycode: Keycode) -> MediaKey? {
+        switch keycode {
+        case 113, 144: return .brightnessUp
+        case 107, 145: return .brightnessDown
+        default: return nil
+        }
+    }
 
     private func shouldNotifyDelegate(ofEvent event: KeyEvent) -> Bool {
         switch keyPressMode {
@@ -148,10 +148,10 @@ public class MediaKeyTap {
 
 extension MediaKeyTap: MediaApplicationWatcherDelegate {
     func updateIsActiveMediaApp(_ active: Bool) {
-		let keysMedia: [MediaKey] = [.playPause, .previous, .next, .rewind, .fastForward]
-		if Set(keysToWatch).intersection(Set(keysMedia)).count > 0 {
-			interceptMediaKeys = active
-		}
+        let keysMedia: [MediaKey] = [.playPause, .previous, .next, .rewind, .fastForward]
+        if Set(keysToWatch).intersection(Set(keysMedia)).count > 0 {
+            interceptMediaKeys = active
+        }
     }
 
     // When a static whitelisted app starts, we need to restart the tap to ensure that
@@ -172,10 +172,10 @@ extension MediaKeyTap: MediaKeyTapInternalsDelegate {
     }
 
     func handle(keyEvent: KeyEvent, isFunctionKey: Bool) {
-		if let key = isFunctionKey ? MediaKeyTap.functionKeyCodeToMediaKey(keyEvent.keycode) : MediaKeyTap.keycodeToMediaKey(keyEvent.keycode) {
-			if shouldNotifyDelegate(ofEvent: keyEvent) {
-				delegate.handle(mediaKey: key, event: keyEvent)
-			}
+        if let key = isFunctionKey ? MediaKeyTap.functionKeyCodeToMediaKey(keyEvent.keycode) : MediaKeyTap.keycodeToMediaKey(keyEvent.keycode) {
+            if shouldNotifyDelegate(ofEvent: keyEvent) {
+                delegate.handle(mediaKey: key, event: keyEvent)
+            }
         }
     }
 
