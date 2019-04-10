@@ -78,7 +78,9 @@ class MediaKeyTapInternals {
                 return event
             }
 
-            return self.handle(event: event, ofType: type)
+            return DispatchQueue.main.sync {
+                return self.handle(event: event, ofType: type)
+            }
         }
 
         try startKeyEventTap(callback: eventTapCallback, restart: restart)
@@ -105,9 +107,7 @@ class MediaKeyTapInternals {
 					}
 				}
 
-				DispatchQueue.main.async {
-					self.delegate?.handle(keyEvent: KeyEvent(keycode: Int32(keycode), keyFlags: 0, keyPressed: true, keyRepeat: false), isFunctionKey: true)
-				}
+        self.delegate?.handle(keyEvent: KeyEvent(keycode: Int32(keycode), keyFlags: 0, keyPressed: true, keyRepeat: false), isFunctionKey: true)
 
 				return nil
 			} else {
@@ -131,9 +131,7 @@ class MediaKeyTapInternals {
 				}
 			}
 
-            DispatchQueue.main.async {
-                self.delegate?.handle(keyEvent: nsEvent.keyEvent, isFunctionKey: false)
-            }
+            self.delegate?.handle(keyEvent: nsEvent.keyEvent, isFunctionKey: false)
 
             return nil
         }
