@@ -31,23 +31,33 @@ class ViewController: NSViewController {
 }
 
 extension ViewController: MediaKeyTapDelegate {
-    func handle(mediaKey: MediaKey, event: KeyEvent) {
+    func handle(mediaKey: MediaKey, event: KeyEvent?) {
         switch mediaKey {
         case .playPause:
             print("Play/pause pressed")
-            toggleLabel(playPauseLabel, enabled: event.keyPressed)
+            toggleLabel(playPauseLabel, enabled: event?.keyPressed ?? false)
         case .previous:
             print("Previous pressed")
-            toggleLabel(previousLabel, enabled: event.keyPressed)
+            toggleLabel(previousLabel, enabled: event?.keyPressed ?? false)
         case .rewind:
             print("Rewind pressed")
-            toggleLabel(rewindLabel, enabled: event.keyPressed)
+            toggleLabel(rewindLabel, enabled: event?.keyPressed ?? false)
         case .next:
             print("Next pressed")
-            toggleLabel(nextLabel, enabled: event.keyPressed)
+            toggleLabel(nextLabel, enabled: event?.keyPressed ?? false)
         case .fastForward:
             print("Fast Forward pressed")
-            toggleLabel(fastForwardLabel, enabled: event.keyPressed)
-        }
+            toggleLabel(fastForwardLabel, enabled: event?.keyPressed ?? false)
+        case .brightnessUp:
+          print("Brightness up pressed")
+        case .brightnessDown:
+          print("Brightness down pressed")
+        case .volumeUp:
+          print("Volume up pressed")
+        case .volumeDown:
+          print("Volume down pressed")
+        case .mute:
+          print("Mute pressed")
+      }
     }
 }
