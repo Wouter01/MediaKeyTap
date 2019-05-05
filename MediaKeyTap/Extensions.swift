@@ -13,8 +13,8 @@ precedencegroup FunctorPrecedence {
     higherThan: DefaultPrecedence
 }
 
-infix operator <^> : FunctorPrecedence
+infix operator <^>: FunctorPrecedence
 
-func <^><T, U>(f: (T) -> U, ap: T?) -> U? {
+func <^> <T, U>(f: (T) -> U, ap: T?) -> U? {
     return ap.map(f)
 }

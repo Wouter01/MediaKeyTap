@@ -26,42 +26,42 @@ class MediaApplicationWatcher {
     let mediaKeyTapReplyNotification = "MediaKeyTapReply" // Sent on receipt of a mediaKeyTapDidStartNotification
 
     init() {
-        self.mediaApps = []
-        self.dynamicWhitelist = []
+        mediaApps = []
+        dynamicWhitelist = []
     }
 
     deinit {
         stop()
     }
 
-	/// Activate the currently running application (without an NSNotification)
-	func activate() {
-		handleApplicationActivation(application: NSRunningApplication.current)
-	}
+    /// Activate the currently running application (without an NSNotification)
+    func activate() {
+        handleApplicationActivation(application: NSRunningApplication.current)
+    }
 
     func start() {
-		let notificationCenter = NSWorkspace.shared.notificationCenter
+        let notificationCenter = NSWorkspace.shared.notificationCenter
 
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationLaunched),
-									   name: NSWorkspace.didLaunchApplicationNotification,
+                                       name: NSWorkspace.didLaunchApplicationNotification,
                                        object: nil)
 
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationActivated),
-									   name: NSWorkspace.didActivateApplicationNotification,
+                                       name: NSWorkspace.didActivateApplicationNotification,
                                        object: nil)
 
         notificationCenter.addObserver(self,
                                        selector: #selector(applicationTerminated),
-									   name: NSWorkspace.didTerminateApplicationNotification,
+                                       name: NSWorkspace.didTerminateApplicationNotification,
                                        object: nil)
 
         setupDistributedNotifications()
     }
 
     func stop() {
-		NSWorkspace.shared.notificationCenter.removeObserver(self)
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
     }
 
     func setupDistributedNotifications() {
@@ -94,41 +94,41 @@ class MediaApplicationWatcher {
 
     // MARK: - Notifications
 
-    @objc fileprivate func applicationLaunched(_ notification: Notification) {
-		if let application = (notification as NSNotification).userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
-			if inStaticWhitelist(application) && application != NSRunningApplication.current {
+    @objc private func applicationLaunched(_ notification: Notification) {
+        if let application = (notification as NSNotification).userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
+            if inStaticWhitelist(application), application != NSRunningApplication.current {
                 delegate?.whitelistedAppStarted()
             }
         }
     }
 
-    @objc fileprivate func applicationActivated(_ notification: Notification) {
-		if let application = (notification as NSNotification).userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
+    @objc private func applicationActivated(_ notification: Notification) {
+        if let application = (notification as NSNotification).userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
             guard whitelisted(application) else { return }
 
             handleApplicationActivation(application: application)
         }
     }
 
-    @objc fileprivate func applicationTerminated(_ notification: Notification) {
-		if let application = (notification as NSNotification).userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
+    @objc private func applicationTerminated(_ notification: Notification) {
+        if let application = (notification as NSNotification).userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
             mediaApps = mediaApps.filter { $0 != application }
             updateKeyInterceptStatus()
         }
     }
 
-	// When activated, move `application` to the front of `mediaApps` and toggle the tap as necessary
-	private func handleApplicationActivation(application: NSRunningApplication) {
-		mediaApps = mediaApps.filter { $0 != application }
-		mediaApps.insert(application, at: 0)
-		updateKeyInterceptStatus()
-	}
+    // When activated, move `application` to the front of `mediaApps` and toggle the tap as necessary
+    private func handleApplicationActivation(application: NSRunningApplication) {
+        mediaApps = mediaApps.filter { $0 != application }
+        mediaApps.insert(application, at: 0)
+        updateKeyInterceptStatus()
+    }
 
-    fileprivate func updateKeyInterceptStatus() {
+    private func updateKeyInterceptStatus() {
         guard mediaApps.count > 0 else { return }
 
         let activeApp = mediaApps.first!
-		let ownApp = NSRunningApplication.current
+        let ownApp = NSRunningApplication.current
 
         delegate?.updateIsActiveMediaApp(activeApp == ownApp)
     }
@@ -169,7 +169,7 @@ class MediaApplicationWatcher {
             "org.niltsh.MPlayerX",
             "org.quodlibet.quodlibet",
             "org.videolan.vlc",
-            "ru.ya.themblsha.YandexMusic"
+            "ru.ya.themblsha.YandexMusic",
         ]
 
         if let ownIdentifier = Bundle.main.bundleIdentifier {
@@ -179,15 +179,15 @@ class MediaApplicationWatcher {
         return whitelist
     }
 
-    fileprivate func inStaticWhitelist(_ application: NSRunningApplication) -> Bool {
+    private func inStaticWhitelist(_ application: NSRunningApplication) -> Bool {
         return (whitelistedApplicationIdentifiers().contains <^> application.bundleIdentifier) ?? false
     }
 
-    fileprivate func inDynamicWhitelist(_ application: NSRunningApplication) -> Bool {
+    private func inDynamicWhitelist(_ application: NSRunningApplication) -> Bool {
         return (dynamicWhitelist.contains <^> application.bundleIdentifier) ?? false
     }
 
-    fileprivate func whitelisted(_ application: NSRunningApplication) -> Bool {
+    private func whitelisted(_ application: NSRunningApplication) -> Bool {
         return inStaticWhitelist(application) || inDynamicWhitelist(application)
     }
 }
