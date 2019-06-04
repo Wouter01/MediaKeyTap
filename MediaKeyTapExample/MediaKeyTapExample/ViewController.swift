@@ -31,7 +31,10 @@ class ViewController: NSViewController {
 }
 
 extension ViewController: MediaKeyTapDelegate {
-  func handle(mediaKey: MediaKey, event: KeyEvent?) {
+  func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?) {
+	if modifiers?.isSuperset(of: NSEvent.ModifierFlags.init([.shift, .option])) ?? false {
+		print("Shift + Option pressed")
+	}
     switch mediaKey {
     case .playPause:
       print("Play/pause pressed")
