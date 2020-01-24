@@ -106,7 +106,7 @@ class MediaKeyTapInternals {
           }
         }
 
-		self.delegate?.handle(keyEvent: KeyEvent(keycode: Int32(keycode), keyFlags: 0, keyPressed: true, keyRepeat: false), isFunctionKey: true, modifiers: nil)
+        self.delegate?.handle(keyEvent: KeyEvent(keycode: Int32(keycode), keyFlags: 0, keyPressed: true, keyRepeat: false), isFunctionKey: true, modifiers: NSEvent(cgEvent: event)?.modifierFlags)
 
         return nil
       } else {
