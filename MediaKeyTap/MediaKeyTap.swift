@@ -128,8 +128,8 @@ public class MediaKeyTap {
 
   public static func functionKeyCodeToMediaKey(_ keycode: Keycode) -> MediaKey? {
     switch keycode {
-    case 113, 144: return .brightnessUp
-    case 107, 145: return .brightnessDown
+    case 144: return .brightnessUp
+    case 145: return .brightnessDown
     default: return nil
     }
   }
