@@ -42,6 +42,7 @@ public protocol MediaKeyTapDelegate {
 }
 
 public class MediaKeyTap {
+  public static var useAlternateBrightnessKeys: Bool = true
   let delegate: MediaKeyTapDelegate
   let mediaApplicationWatcher: MediaApplicationWatcher
   let internals: MediaKeyTapInternals
@@ -128,8 +129,10 @@ public class MediaKeyTap {
 
   public static func functionKeyCodeToMediaKey(_ keycode: Keycode) -> MediaKey? {
     switch keycode {
-    case 113, 144: return .brightnessUp
-    case 107, 145: return .brightnessDown
+    case 107: return (useAlternateBrightnessKeys ? .brightnessDown : nil) // F14
+    case 113: return (useAlternateBrightnessKeys ? .brightnessUp : nil) // F15
+    case 144: return .brightnessUp // Brightness up media key
+    case 145: return .brightnessDown // Brightness down media key
     default: return nil
     }
   }
