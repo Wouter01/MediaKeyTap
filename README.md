@@ -52,7 +52,11 @@ The MediaKeyTap initialiser allows the keypress behaviour to be specified:
 
 ## Requirements
 
-* In order to capture key events globally, your application cannot be sandboxed or you will not receive any events.
+In order to capture key events globally, you need to ensure:
+
+* Your application is not sandboxed
+* Your info.plist provides `NSAppleEventsUsageDescription`
+* Your application has accessibility privileges (will be asked automatically)
 
 ## Installation
 
