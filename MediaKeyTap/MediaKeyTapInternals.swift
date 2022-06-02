@@ -182,8 +182,6 @@ class MediaKeyTapInternals {
 
     private func keyCaptureEventTapPort(callback: @escaping EventTapCallback) -> CFMachPort? {
         let cCallback: CGEventTapCallBack = { _, type, event, refcon in
-            print("Capturing")
-
             let innerBlock = unsafeBitCast(refcon, to: EventTapCallback.self)
             return innerBlock(type, event).map(Unmanaged.passUnretained)
         }
