@@ -169,7 +169,7 @@ class MediaKeyTapInternals {
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorSystemDefault, port, 0)
         guard let source = runLoopSource else { throw EventTapError.runLoopSourceCreationFailure }
 
-        let queue = DispatchQueue(label: "MediaKeyTap Runloop", attributes: [])
+        let queue = DispatchQueue.main
         runLoopQueue = queue
 
         queue.async { [weak self] in
