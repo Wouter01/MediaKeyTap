@@ -37,14 +37,13 @@ public struct KeyEvent {
     public let keyRepeat: Bool
 }
 
-public protocol MediaKeyTapDelegate: class {
+public protocol MediaKeyTapDelegate: AnyObject {
     func handle(mediaKey: MediaKey, event: KeyEvent?, modifiers: NSEvent.ModifierFlags?)
 }
 
 public class MediaKeyTap {
     public static var useAlternateBrightnessKeys: Bool = true
     weak var delegate: MediaKeyTapDelegate!
-    let mediaApplicationWatcher: MediaApplicationWatcher
     let internals: MediaKeyTapInternals
     let keyPressMode: KeyPressMode
     var observeBuiltIn: Bool = true
@@ -74,7 +73,6 @@ public class MediaKeyTap {
     public init(delegate: MediaKeyTapDelegate, on mode: KeyPressMode = .keyDown, for keys: [MediaKey] = [], observeBuiltIn: Bool = true) {
         self.delegate = delegate
         interceptMediaKeys = false
-        mediaApplicationWatcher = MediaApplicationWatcher()
         internals = MediaKeyTapInternals()
         keyPressMode = mode
         self.observeBuiltIn = observeBuiltIn
@@ -83,31 +81,20 @@ public class MediaKeyTap {
         }
     }
 
-    /// Activate the currently running application
-    open func activate() {
-        mediaApplicationWatcher.activate()
-    }
-
     /// Start the key tap
     open func start() {
-        mediaApplicationWatcher.delegate = self
-        mediaApplicationWatcher.start()
 
         internals.delegate = self
         do {
             try internals.startWatchingMediaKeys()
         } catch let error as EventTapError {
-            mediaApplicationWatcher.stop()
             print(error.description)
         } catch {}
     }
 
     /// Stop the key tap
     open func stop() {
-        mediaApplicationWatcher.stop()
         internals.stopWatchingMediaKeys()
-
-        mediaApplicationWatcher.delegate = nil
         internals.delegate = nil
     }
 
@@ -149,25 +136,7 @@ public class MediaKeyTap {
     }
 }
 
-extension MediaKeyTap: MediaApplicationWatcherDelegate {
-    func updateIsActiveMediaApp(_ active: Bool) {
-        let keysMedia: [MediaKey] = [.playPause, .previous, .next, .rewind, .fastForward]
-        if Set(keysToWatch).intersection(Set(keysMedia)).count > 0 {
-            interceptMediaKeys = active
-        }
-    }
 
-    // When a static whitelisted app starts, we need to restart the tap to ensure that
-    // the dynamic whitelist is not overridden by the other app
-    func whitelistedAppStarted() {
-        do {
-            try internals.restartTap()
-        } catch let error as EventTapError {
-            mediaApplicationWatcher.stop()
-            print(error.description)
-        } catch {}
-    }
-}
 
 extension MediaKeyTap: MediaKeyTapInternalsDelegate {
     func updateInterceptMediaKeys(_ intercept: Bool) {
