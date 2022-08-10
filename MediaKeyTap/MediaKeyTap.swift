@@ -144,6 +144,7 @@ extension MediaKeyTap: MediaKeyTapInternalsDelegate {
     }
 
     func handle(keyEvent: KeyEvent, isFunctionKey: Bool, modifiers: NSEvent.ModifierFlags?) {
+        print(keyEvent)
         if let key = isFunctionKey ? MediaKeyTap.functionKeyCodeToMediaKey(keyEvent.keycode) : MediaKeyTap
             .keycodeToMediaKey(keyEvent.keycode)
         {
