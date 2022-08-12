@@ -37,6 +37,8 @@ extension NSEvent {
             NX_KEYTYPE_SOUND_UP,
             NX_KEYTYPE_SOUND_DOWN,
             NX_KEYTYPE_MUTE,
+            NX_KEYTYPE_ILLUMINATION_UP,
+            NX_KEYTYPE_ILLUMINATION_DOWN
         ]
         return isKeyEvent && mediaKeys.contains(keycode)
     }

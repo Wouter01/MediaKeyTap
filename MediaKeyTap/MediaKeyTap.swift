@@ -19,6 +19,8 @@ public enum MediaKey {
     case volumeUp
     case volumeDown
     case mute
+    case keyboardBrightnessUp
+    case keyboardBrightnessDown
 }
 
 public enum KeyPressMode {
@@ -58,6 +60,8 @@ public class MediaKeyTap {
         .volumeUp,
         .volumeDown,
         .mute,
+        .keyboardBrightnessDown,
+        .keyboardBrightnessUp
     ]
 
     var interceptMediaKeys: Bool {
@@ -110,6 +114,8 @@ public class MediaKeyTap {
         case NX_KEYTYPE_SOUND_UP: return .volumeUp
         case NX_KEYTYPE_SOUND_DOWN: return .volumeDown
         case NX_KEYTYPE_MUTE: return .mute
+        case NX_KEYTYPE_ILLUMINATION_UP: return .keyboardBrightnessUp
+        case NX_KEYTYPE_ILLUMINATION_DOWN: return .keyboardBrightnessDown
         default: return nil
         }
     }
