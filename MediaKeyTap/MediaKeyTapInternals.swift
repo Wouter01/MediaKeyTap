@@ -142,7 +142,7 @@ class MediaKeyTapInternals {
                   delegate?.isInterceptingMediaKeys() ?? false
             else { return event }
 
-            if delegate?.observeBuiltIn ?? true == false {
+            if (delegate?.observeBuiltIn ?? true) == false {
                 if let id = mainScreen()?.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? CGDirectDisplayID {
                     if CGDisplayIsBuiltin(id) != 0 {
                         return event
@@ -188,11 +188,20 @@ class MediaKeyTapInternals {
 
         let refcon = unsafeBitCast(callback, to: UnsafeMutableRawPointer.self)
 
+        // Brightness keys on some keyboards aren't included in NX_SYSDEFINED, so they need additional handling and NX_KEYDOWN and NX_KEYUP.
+        // However, enabling these causes some key events to be dismissed (in my case, from the "r" key) when running the app in DEBUG mode.
+        // Therefore, they are only enabled in production, where they work fine.
+        #if DEBUG
+        let eventsOfInterest = CGEventMask(1 << NX_SYSDEFINED)
+        #else
+        let eventsOfInterest = CGEventMask(1 << NX_KEYDOWN) | CGEventMask(1 << NX_KEYUP) | CGEventMask(1 << NX_SYSDEFINED)
+        #endif
+
         return CGEvent.tapCreate(
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
             options: .defaultTap,
-            eventsOfInterest: CGEventMask(1 << NX_KEYDOWN) | CGEventMask(1 << NX_KEYUP) | CGEventMask(1 << NX_SYSDEFINED),
+            eventsOfInterest: eventsOfInterest,
             callback: cCallback,
             userInfo: refcon
         )
